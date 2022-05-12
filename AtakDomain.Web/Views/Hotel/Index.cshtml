@@ -1,0 +1,42 @@
+﻿@model IEnumerable<Hotel>
+
+<form asp-controller="Hotel" asp-action="Index" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" />
+    <label>Database veriyi kaydettirmek için "Evet" yazın</label>
+    <input type="text" name="Save" placeholder="Evet">
+    <hr />
+
+    <button id="submit" class="submit" name="button" value="Upload" type="Submit">Upload</button>
+    @*<h1>Status: @ViewData["message"]</h1>*@
+
+</form>
+
+@if (Model.Count() > 0)
+{
+    <hr />
+
+    <form method="post" asp-controller="Hotel" asp-action="Index">
+        <table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" id="example">
+        <tr>
+            <td>Name <button name = "button" value="SortName" type="submit"> s</button> </td>
+            <td>Address <button name = "button" value="SortAddress" type="submit"> s</button> </td>
+            <td>Stars <button name = "button" value="SortStars" type="submit"> s</button> </td>
+            <td>Contact <button name = "button" value="SortContact" type="submit"> s</button> </td>
+            <td>Phone <button name = "button" value="SortPhone" type="submit"> s</button> </td>
+            <td>Url <button name = "button" value="SortUrl" type="submit"> s</button> </td>
+        </tr>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.Address</td>
+                <td>@item.Stars</td>
+                <td>@item.Contact</td>
+                <td>@item.Phone</td>
+                <td>@item.Url</td>
+            </tr>
+        }
+
+    </table>
+    </form>
+}
