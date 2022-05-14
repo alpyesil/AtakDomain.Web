@@ -14,7 +14,7 @@ Then, navigate into the project directory:
 
 ## Screenshots
 - ### Hotel Csv Upload Page
-![HTML Schema](https://cdn.discordapp.com/attachments/916029512884563999/974671681140457542/unknown.png)
+![HTML Schema](https://cdn.discordapp.com/attachments/916029512884563999/975066062863355984/unknown.png)
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
