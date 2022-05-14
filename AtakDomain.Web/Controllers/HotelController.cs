@@ -5,6 +5,12 @@ using AtakDomain.Core.Entity;
 using AtakDomain.Repository;
 using AtakDomain.Services.Services;
 using AtakDomain.Web.Models;
+using System.Xml.Serialization;
+using Newtonsoft.Json;
+using System.Text;
+using System.Text.Unicode;
+using System.Net;
+using AtakDomain.Web.Helper;
 
 namespace AtakDomain.Web.Controllers
 {
@@ -59,7 +65,6 @@ namespace AtakDomain.Web.Controllers
 
                 case "SortName":
                     var hote2ls = GetHotelList(_hotelService.GetLastFiles().Result.Name);
-
                     hote2ls.Sort((x, y) => x.Name.CompareTo(y.Name));
                     return View(hote2ls);
 
@@ -109,8 +114,48 @@ namespace AtakDomain.Web.Controllers
                 {
                     var hotel = csv.GetRecord<Hotel>();
 
-                    hotels.Add(hotel);
-                    ViewData["Hotels"] = hotels;
+                    // Geçerli URL'ye gidip response alabilirse TRUE alamazsa FALSE dödürecek ve hata fıraltacak ekstra olarak yazığım bir valid.
+                    //if (!checkWebsite(hotel.Url))
+                    //{
+                    //    ViewBag.URL = "Hotel URL not valid";
+                    //}
+
+                    char[] validCharacter = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '_', '.' };
+
+                    if (hotel.Name.Any(c => !validCharacter.Contains(c)))
+                    {
+                        ViewBag.Name = "Hotel Name not valid: " + hotel.Name;
+                    }
+                    if (HelperValid.checkUrl(hotel.Url) == false)
+                    {
+                        ViewBag.URL = "Hotel URL not valid: " + hotel.Url;
+                    }
+                    if (hotel.Name == null)
+                    {
+                        ViewBag.Name = "Hotel name is required: ";
+                    }
+                    if (hotel.Stars < 0 || hotel.Stars > 5)
+                    {
+                        ViewBag.Stars = "Hotel rating must be between 0 and 5: " + hotel.Name;
+                    }
+                    else
+                    {
+                        hotels.Add(hotel);
+                    }
+
+                    //XML File Saved
+                    var xml = new XmlSerializer(typeof(List<Hotel>));
+                    using (var writer = new StreamWriter($"{Directory.GetCurrentDirectory()}\\wwwroot\\files\\{fileName}.xml"))
+                    {
+                        xml.Serialize(writer, hotels);
+                    }
+
+                    //JSON File Saved
+                    var json = JsonConvert.SerializeObject(hotels);
+                    using (var writer = new StreamWriter($"{Directory.GetCurrentDirectory()}\\wwwroot\\files\\{fileName}.json"))
+                    {
+                        writer.Write(json);
+                    }
 
                     if (ViewBag.Save == "evet")
                     {
@@ -143,6 +188,26 @@ namespace AtakDomain.Web.Controllers
             hotels.Sort((x, y) => x.Name.CompareTo(y.Name));
 
             return hotels;
+        }
+
+        public IActionResult Download(string button)
+        {
+            var fileName = _hotelService.GetLastFiles().Result.Name;
+
+            switch (button)
+            {
+                case "CSV":
+                    return File(new FileStream($"{Directory.GetCurrentDirectory()}\\wwwroot\\files\\{fileName}.csv", FileMode.Open), "text/csv", $"{fileName}.csv");
+
+                case "DownloadXML":
+                    return File(new FileStream($"{Directory.GetCurrentDirectory()}\\wwwroot\\files\\{fileName}.xml", FileMode.Open), "text/xml", $"{fileName}.xml");
+
+                case "DownloadJSON":
+                    return File(new FileStream($"{Directory.GetCurrentDirectory()}\\wwwroot\\files\\{fileName}.json", FileMode.Open), "text/json", $"{fileName}.json");
+
+                default:
+                    return RedirectToAction("Index");
+            }
         }
     }
 }
